@@ -212,10 +212,10 @@ export default function App() {
             Đã gửi lịch rảnh!
           </p>
           <h1 className="mt-3 text-[2rem] font-black leading-tight text-[#623646]">
-            Hẹn một buổi xem phim nhé!
+            Cảm ơn em đã đồng ý đi với anh nhaaaa
           </h1>
           <p className="mx-auto mt-3 max-w-[18rem] text-[15px] font-semibold leading-6 text-[#946275]">
-            Ngày bạn chọn là {formatDate(availableDate)}. Phản hồi đã được gửi đi.
+            Ngày em đã chọn là {formatDate(availableDate)}. Phản hồi đã được gửi đi.
           </p>
           <button
             type="button"
