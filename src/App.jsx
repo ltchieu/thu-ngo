@@ -9,7 +9,7 @@ const invitationLines = [
   'Em suy nghĩ thêm chút đi màaaa.',
   'Anh mới kiếm được vài bộ kinh dị hay lắmm, đi thử nha?',
   'Anh sẽ bao em bắp rang với nước mòo',
-  'Anh thực sự mún đi với emmm.',
+  'Anh thực sự muốn đi với em.',
   'Cho anh một cơ hội nhann 🥺',
 ]
 
