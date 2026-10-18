@@ -1,127 +1,301 @@
 import { useState } from 'react'
 
-const pleas = [
-  'Anh có thể trò chuyện với em đêm nay hong?',
-  'Một xíu thôi cũng được mà… 🥺',
-  'Em có chuyện vui muốn kể anh nghe á',
-  'Hong lẽ anh nỡ từ chối em thiệt sao?',
-  'Cho em xin một cơ hội cuối nhaaa 💗',
-  'Nút màu hồng đang chờ anh đó ✨',
+const FORM_ID = import.meta.env.VITE_FORMSPREE_FORM_ID
+const FORM_ENDPOINT = FORM_ID ? `https://formspree.io/f/${FORM_ID}` : ''
+const DEFAULT_PHOTO = '/1792327768529_2073987098116228667_3395705528928461548_a083a54b9fa92103e8598c6ecaf8b574.jpg'
+
+const invitationLines = [
+  'Cuối tuần này đi xem phim với anh hongg?',
+  'Em suy nghĩ thêm chút đi màaaa.',
+  'Anh mới kiếm được vài bộ kinh dị hay lắmm, đi thử nha?',
+  'Anh sẽ bao em bắp rang với nước mòo',
+  'Anh thực sự mún đi với emmm.',
+  'Cho anh một cơ hội nhann 🥺',
 ]
 
-const yesLabels = [
-  'Đồng ý',
-  'Đồng ý nha',
-  'Nói chuyện xíu nè',
-  'Thôi được rồi 💗',
-  'Đồng ý luôn!',
-  'Okii, nói chuyện thôi ✨',
+const acceptLabels = [
+  'Đi xem phim',
+  'Nghĩ lại rồi',
+  'Nghe cũng hợp lý',
+  'Có bắp thì đi',
+  'Chốt kèo',
+  'Oke, đi thôi!',
 ]
 
-const floatingHearts = [
-  ['♡', 'left-[8%] top-[12%]', 'delay-0'],
-  ['♥', 'right-[9%] top-[18%]', 'delay-700'],
-  ['♡', 'left-[13%] bottom-[18%]', 'delay-1000'],
-  ['♥', 'right-[10%] bottom-[12%]', 'delay-300'],
+const floatingDecorations = [
+  ['✦', 'left-[8%] top-[12%]', 'delay-0'],
+  ['●', 'right-[9%] top-[18%]', 'delay-700'],
+  ['✦', 'left-[13%] bottom-[18%]', 'delay-1000'],
+  ['●', 'right-[10%] bottom-[12%]', 'delay-300'],
 ]
 
-function MoonIllustration({ happy = false }) {
+function getToday() {
+  const now = new Date()
+  const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60_000)
+  return localDate.toISOString().split('T')[0]
+}
+
+function formatDate(date) {
+  if (!date) return ''
+
+  return new Intl.DateTimeFormat('vi-VN', {
+    weekday: 'long',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date(`${date}T00:00:00`))
+}
+
+async function sendToFormspree(fields) {
+  if (!FORM_ENDPOINT) {
+    throw new Error('Chưa cấu hình Formspree Form ID.')
+  }
+
+  const response = await fetch(FORM_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      _subject: 'Phản hồi lời mời đi xem phim',
+      recipient: 'lch3504@gmail.com',
+      submittedAt: new Date().toISOString(),
+      ...fields,
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error('Gửi phản hồi chưa thành công. Vui lòng thử lại.')
+  }
+}
+
+function InvitationPhoto({ src = DEFAULT_PHOTO }) {
   return (
-    <div className="relative mx-auto h-36 w-36" aria-hidden="true">
-      <div className="absolute inset-2 rotate-[-8deg] rounded-full bg-gradient-to-br from-[#ffd9e6] to-[#ff9ebe] shadow-[inset_-12px_-10px_0_rgba(232,110,150,0.12),0_18px_35px_rgba(224,118,153,0.2)]">
-        <span className="absolute left-7 top-12 h-2.5 w-2.5 rounded-full bg-[#6d4050]" />
-        <span className="absolute right-7 top-12 h-2.5 w-2.5 rounded-full bg-[#6d4050]" />
-        <span className="absolute left-5 top-[3.8rem] h-3 w-5 rounded-full bg-[#ff82aa]/45 blur-[1px]" />
-        <span className="absolute right-5 top-[3.8rem] h-3 w-5 rounded-full bg-[#ff82aa]/45 blur-[1px]" />
-        <span className={`absolute left-1/2 top-[4.4rem] -translate-x-1/2 border-b-2 border-[#6d4050] ${happy ? 'h-5 w-9 rounded-b-full' : 'h-3 w-6 rounded-full'}`} />
-      </div>
-      <span className="absolute right-0 top-2 animate-twinkle text-2xl text-[#f4a31f]">✦</span>
-      <span className="absolute bottom-1 left-2 animate-twinkle text-lg text-[#f7b8cf] [animation-delay:600ms]">✦</span>
+    <div className="relative mx-auto my-2 h-40 w-40">
+      <div className="absolute -inset-1 rotate-3 rounded-[2rem] bg-gradient-to-br from-[#ffd6e4] to-[#ffd9a9] shadow-[0_16px_32px_rgba(183,91,121,0.2)]" aria-hidden="true" />
+      <img
+        key={src}
+        src={src}
+        alt="Nhân vật đáng yêu đang chờ câu trả lời"
+        className="relative h-full w-full animate-fade-up rounded-[1.75rem] border-4 border-white bg-white object-cover shadow-sm"
+      />
+      <span className="absolute -right-3 top-1 animate-twinkle text-2xl text-[#f4a31f]" aria-hidden="true">✦</span>
+      <span className="absolute -bottom-1 -left-2 animate-twinkle text-lg text-[#f7b8cf] [animation-delay:600ms]" aria-hidden="true">✦</span>
     </div>
   )
 }
 
 export default function App() {
-  const [step, setStep] = useState(0)
-  const [accepted, setAccepted] = useState(false)
+  const [screen, setScreen] = useState('invite')
+  const [declineStep, setDeclineStep] = useState(0)
+  const [availableDate, setAvailableDate] = useState('')
+  const [note, setNote] = useState('')
+  const [status, setStatus] = useState('idle')
+  const [error, setError] = useState('')
 
-  const decline = () => setStep((current) => Math.min(current + 1, 5))
+  const reset = () => {
+    setScreen('invite')
+    setDeclineStep(0)
+    setAvailableDate('')
+    setNote('')
+    setStatus('idle')
+    setError('')
+  }
 
-  if (accepted) {
+  const submitAvailableDate = async (event) => {
+    event.preventDefault()
+    setStatus('submitting')
+    setError('')
+
+    try {
+      await sendToFormspree({
+        response: 'Đồng ý đi xem phim',
+        declineCount: declineStep,
+        acceptedAfter: declineStep === 0
+          ? 'Đồng ý ngay lần đầu'
+          : `Đồng ý sau ${declineStep} lần chọn “Để hôm khác”`,
+        availableDate,
+        availableDateDisplay: formatDate(availableDate),
+        note: note.trim() || 'Không có ghi chú',
+      })
+      setStatus('idle')
+      setScreen('accepted')
+    } catch (submitError) {
+      setStatus('error')
+      setError(submitError.message)
+    }
+  }
+
+  const declineInvitation = () => {
+    const nextStep = Math.min(declineStep + 1, 5)
+    setDeclineStep(nextStep)
+    setError('')
+
+    if (nextStep === 5) {
+      sendToFormspree({
+        response: 'Không đi xem phim được',
+        availableDate: 'Không chọn',
+        note: 'Người nhận đã chọn “Để hôm khác” 5 lần',
+      }).catch((submitError) => {
+        setError(submitError.message)
+      })
+    }
+  }
+
+  if (screen === 'schedule') {
     return (
-      <main className="relative grid min-h-[100svh] place-items-center overflow-hidden bg-[#fff4f7] px-5 py-10 text-[#5d3544]">
-        <Background />
+      <PageShell>
         <section className="relative z-10 w-full max-w-sm animate-pop rounded-[2.25rem] border border-white/90 bg-white/75 p-7 text-center shadow-card backdrop-blur-xl">
-          <MoonIllustration happy />
-          <p className="mt-4 text-xs font-extrabold uppercase tracking-[0.28em] text-[#d8698d]">Yay, hẹn được anh rồi!</p>
-          <h1 className="mt-3 text-[2rem] font-black leading-tight text-[#623646]">Em biết anh sẽ đồng ý mà 💗</h1>
-          <p className="mx-auto mt-3 max-w-[17rem] text-[15px] font-semibold leading-6 text-[#946275]">Tối nay mình kể nhau nghe đủ thứ trên đời nha. Em chờ tin nhắn của anh đó!</p>
+          <InvitationPhoto />
+          <p className="mt-3 text-xs font-extrabold uppercase tracking-[0.24em] text-[#d8698d]">Chọn ngày đi xem</p>
+          <h1 className="mt-3 text-[1.9rem] font-black leading-tight text-[#623646]">Hôm nào bạn rảnh?</h1>
+          <p className="mx-auto mt-2 max-w-[18rem] text-sm font-semibold leading-6 text-[#946275]">
+            Chọn một ngày thuận tiện, còn phim và rạp mình chốt sau.
+          </p>
+
+          <form className="mt-6 text-left" onSubmit={submitAvailableDate}>
+            <label className="block text-sm font-extrabold text-[#75485a]" htmlFor="available-date">
+              Ngày bạn rảnh
+            </label>
+            <input
+              id="available-date"
+              type="date"
+              min={getToday()}
+              value={availableDate}
+              onChange={(event) => setAvailableDate(event.target.value)}
+              required
+              className="mt-2 min-h-12 w-full rounded-2xl border-2 border-[#f0c7d4] bg-white px-4 py-3 font-bold text-[#623646] outline-none transition focus:border-[#ed729a] focus:ring-4 focus:ring-[#f8d5e0]"
+            />
+
+            <label className="mt-4 block text-sm font-extrabold text-[#75485a]" htmlFor="note">
+              Ghi chú <span className="font-semibold text-[#b08493]">(không bắt buộc)</span>
+            </label>
+            <textarea
+              id="note"
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+              placeholder="Ví dụ: rảnh sau 7 giờ"
+              rows="2"
+              className="mt-2 w-full resize-none rounded-2xl border-2 border-[#f0c7d4] bg-white px-4 py-3 font-semibold text-[#623646] outline-none transition placeholder:text-[#c6a4af] focus:border-[#ed729a] focus:ring-4 focus:ring-[#f8d5e0]"
+            />
+
+            {error && <ErrorMessage message={error} />}
+
+            <button
+              type="submit"
+              disabled={status === 'submitting'}
+              className="mt-5 min-h-14 w-full rounded-full bg-gradient-to-r from-[#f16d98] to-[#eb5a88] px-7 py-4 text-base font-black text-white shadow-yes transition hover:shadow-[0_17px_34px_rgba(235,88,133,0.42)] active:scale-95 disabled:cursor-wait disabled:opacity-65"
+            >
+              {status === 'submitting' ? 'Đang gửi...' : 'Gửi ngày này'}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setScreen('invite'); setError(''); setStatus('idle') }}
+              disabled={status === 'submitting'}
+              className="mt-3 w-full rounded-full px-5 py-3 text-sm font-extrabold text-[#9e6376] transition hover:bg-[#fff0f5] disabled:opacity-50"
+            >
+              Quay lại
+            </button>
+          </form>
+        </section>
+      </PageShell>
+    )
+  }
+
+  if (screen === 'accepted') {
+    return (
+      <PageShell>
+        <section className="relative z-10 w-full max-w-sm animate-pop rounded-[2.25rem] border border-white/90 bg-white/75 p-7 text-center shadow-card backdrop-blur-xl">
+          <InvitationPhoto src="/4.jpg" />
+          <p className="mt-4 text-xs font-extrabold uppercase tracking-[0.26em] text-[#d8698d]">
+            Đã gửi lịch rảnh!
+          </p>
+          <h1 className="mt-3 text-[2rem] font-black leading-tight text-[#623646]">
+            Hẹn một buổi xem phim nhé!
+          </h1>
+          <p className="mx-auto mt-3 max-w-[18rem] text-[15px] font-semibold leading-6 text-[#946275]">
+            Ngày bạn chọn là {formatDate(availableDate)}. Phản hồi đã được gửi đi.
+          </p>
           <button
             type="button"
-            onClick={() => { setAccepted(false); setStep(0) }}
+            onClick={reset}
             className="mt-7 rounded-full border border-[#efb6c9] bg-white px-5 py-3 text-sm font-extrabold text-[#c7547a] transition active:scale-95"
           >
             Xem lại lời mời
           </button>
         </section>
-      </main>
+      </PageShell>
     )
   }
 
-  const yesScale = 1 + step * 0.105
-  const noScale = 1 - step * 0.12
+  const yesScale = 1 + declineStep * 0.1
+  const noScale = Math.max(0.5, 1 - declineStep * 0.12)
+  const invitationPhoto = declineStep >= 5
+    ? '/2.jpg'
+    : declineStep >= 3
+      ? '/3.jpg'
+      : DEFAULT_PHOTO
 
   return (
-    <main className="relative flex min-h-[100svh] items-center justify-center overflow-hidden bg-[#fff4f7] px-5 py-8 font-display text-[#5d3544]">
-      <Background />
-
+    <PageShell>
       <section className="relative z-10 w-full max-w-sm rounded-[2.25rem] border border-white/90 bg-white/75 px-6 py-8 text-center shadow-card backdrop-blur-xl sm:px-8">
         <div className="mx-auto mb-2 inline-flex items-center gap-2 rounded-full bg-[#fff0f5] px-4 py-2 text-xs font-extrabold tracking-wide text-[#d26186]">
           <span className="h-2 w-2 animate-pulse rounded-full bg-[#ef719a]" />
-          LỜI MỜI NHỎ XÍU
+          Thư ngỏ
         </div>
 
-        <MoonIllustration />
+        <InvitationPhoto src={invitationPhoto} />
 
-        <div className="min-h-[8.3rem]" aria-live="polite">
-          <h1 key={step} className="animate-fade-up text-[1.85rem] font-black leading-[1.18] tracking-[-0.025em] text-[#623646]">
-            {pleas[step]}
+        <div className="mt-9 min-h-[9rem]" aria-live="polite">
+          <h1 key={declineStep} className="animate-fade-up text-[1.9rem] font-black leading-[1.18] tracking-[-0.025em] text-[#623646]">
+            {invitationLines[declineStep]}
           </h1>
-          <p className="mx-auto mt-3 max-w-[17rem] text-sm font-semibold leading-6 text-[#9a6b7b]">
-            Em dành riêng tối nay để nghe giọng anh đó.
+          <p className="mx-auto mt-3 max-w-[18rem] text-sm font-semibold leading-6 text-[#9a6b7b]">
+            Như lời đã hứa nên anh gửi thư này để mời em đi xem phim nhá!!!
           </p>
         </div>
 
-        <div className="mt-6 grid min-h-[9.5rem] place-items-center">
-          <div className="flex w-full flex-col items-center justify-center gap-3">
+        <div className="mt-6 flex min-h-[8rem] w-full flex-col items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => { setScreen('schedule'); setError(''); setStatus('idle') }}
+            disabled={status === 'submitting'}
+            style={{ transform: `scale(${yesScale})` }}
+            className="min-h-14 min-w-[12rem] max-w-[90%] rounded-full bg-gradient-to-r from-[#f16d98] to-[#eb5a88] px-7 py-4 text-base font-black text-white shadow-yes transition-[transform,box-shadow] duration-500 ease-out hover:shadow-[0_17px_34px_rgba(235,88,133,0.42)] active:!scale-95 disabled:opacity-65"
+          >
+            {acceptLabels[declineStep]}
+          </button>
+
+          {declineStep < 5 && (
             <button
               type="button"
-              onClick={() => setAccepted(true)}
-              style={{ transform: `scale(${yesScale})` }}
-              className="min-h-14 min-w-[11.5rem] max-w-[90%] rounded-full bg-gradient-to-r from-[#f16d98] to-[#eb5a88] px-7 py-4 text-base font-black text-white shadow-yes transition-[transform,box-shadow] duration-500 ease-out hover:shadow-[0_17px_34px_rgba(235,88,133,0.42)] active:!scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f8b6cc]"
+              onClick={declineInvitation}
+              style={{ transform: `scale(${noScale})` }}
+              className="min-h-11 rounded-full border-2 border-[#efc4d2] bg-white px-6 py-2.5 text-sm font-extrabold text-[#9e6376] transition-transform duration-500 ease-out active:brightness-95"
             >
-              {yesLabels[step]}
+              Để hôm khác
             </button>
-
-            <button
-              type="button"
-              onClick={decline}
-              disabled={step === 5}
-              style={{ transform: `scale(${noScale})`, opacity: step === 5 ? 0.38 : 1 }}
-              className="min-h-11 rounded-full border-2 border-[#efc4d2] bg-white px-6 py-2.5 text-sm font-extrabold text-[#9e6376] transition-[transform,opacity] duration-500 ease-out active:brightness-95 disabled:cursor-not-allowed"
-            >
-              {step === 5 ? 'Hong bấm được nữa rồi' : 'Hong đồng ý'}
-            </button>
-          </div>
+          )}
         </div>
-
-        <div className="mt-1 flex items-center justify-center gap-1.5" aria-label={`Đã năn nỉ ${step} trên 5 lần`}>
-          {[0, 1, 2, 3, 4].map((dot) => (
-            <span key={dot} className={`h-1.5 rounded-full transition-all duration-300 ${dot < step ? 'w-5 bg-[#ef719a]' : 'w-1.5 bg-[#edd2db]'}`} />
-          ))}
-        </div>
-        <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.18em] text-[#c493a3]">{step}/5 lần năn nỉ</p>
       </section>
+    </PageShell>
+  )
+}
+
+function ErrorMessage({ message }) {
+  return (
+    <p role="alert" className="mt-4 rounded-2xl bg-[#fff0f2] px-4 py-3 text-center text-sm font-bold text-[#bd476c]">
+      {message}
+    </p>
+  )
+}
+
+function PageShell({ children }) {
+  return (
+    <main className="relative flex min-h-[100svh] items-center justify-center overflow-hidden bg-[#fff4f7] px-5 py-8 font-display text-[#5d3544]">
+      <Background />
+      {children}
     </main>
   )
 }
@@ -132,8 +306,10 @@ function Background() {
       <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-[#ffc8da]/50 blur-2xl" />
       <div className="absolute -bottom-24 -right-20 h-72 w-72 rounded-full bg-[#ffd8ad]/45 blur-3xl" />
       <div className="absolute left-1/2 top-[18%] h-44 w-44 -translate-x-1/2 rounded-full bg-white/70 blur-3xl" />
-      {floatingHearts.map(([heart, position, delay]) => (
-        <span key={position} className={`absolute ${position} ${delay} animate-float text-2xl font-black text-[#eca4bc]/70`}>{heart}</span>
+      {floatingDecorations.map(([decoration, position, delay]) => (
+        <span key={position} className={`absolute ${position} ${delay} animate-float text-2xl font-black text-[#eca4bc]/70`}>
+          {decoration}
+        </span>
       ))}
       <div className="absolute inset-x-0 bottom-0 h-24 bg-[radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.9),transparent_68%)]" />
     </div>
