@@ -11,7 +11,7 @@ const invitationLines = [
   "Cuối tuần này đi xem phim với anh hongg?",
   "Em hong nhấn từ chối được đâu hehehe",
   "Ơ em vẫn thử àaa",
-  "Em đừng cố gắng nhấn từ chối nữa...",
+  "Em đừng nhấn từ chối nữa...",
 ];
 
 const acceptLabels = ["Đi xem phim"];
